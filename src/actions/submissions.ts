@@ -143,7 +143,13 @@ export async function submitAssignmentAction(
 
     if (uploadError) {
       console.error("submitAssignmentAction upload failed:", uploadError.message);
-      return { status: "error", error: t("errors.uploadFailed") };
+      const isDev = process.env.NODE_ENV !== "production";
+      return {
+        status: "error",
+        error: isDev
+          ? `${t("errors.uploadFailed")}: ${uploadError.message}`
+          : t("errors.uploadFailed"),
+      };
     }
   }
 
@@ -165,7 +171,14 @@ export async function submitAssignmentAction(
     if (filePath) {
       await supabase.storage.from("submissions").remove([filePath]);
     }
-    return { status: "error", error: t("errors.saveFailed") };
+    // In development, show the actual error for debugging; in production, keep it generic
+    const isDev = process.env.NODE_ENV !== "production";
+    return {
+      status: "error",
+      error: isDev && insertError?.message
+        ? `${t("errors.saveFailed")}: ${insertError.message}`
+        : t("errors.saveFailed"),
+    };
   }
 
   // Grade immediately when possible. A failure leaves the row pending; the
