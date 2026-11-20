@@ -55,14 +55,11 @@ export async function loginAction(
   let email = isEmail ? identifier.toLowerCase() : `${identifier.toLowerCase()}@cshub.local`;
 
   if (!isEmail) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("email")
-      .eq("username", identifier.toLowerCase())
-      .maybeSingle();
+    const { data: profileEmail, error: lookupError } = await supabase
+      .rpc("get_email_by_username", { p_username: identifier.toLowerCase() });
 
-    if (profile?.email) {
-      email = profile.email;
+    if (!lookupError && profileEmail) {
+      email = profileEmail;
     }
   }
 
