@@ -103,6 +103,12 @@ export default async function AdminAssignmentPage({
   );
   const similarityPairs = (similarityResult.data ?? []) as SimilarityPair[];
   const grading = gradingStatus();
+
+  if (process.env.NODE_ENV !== "production") {
+    if (similarityResult.error) console.error("[Similarity] RPC error:", similarityResult.error);
+    if (overviewResult.error) console.error("[Overview] RPC error:", overviewResult.error);
+    if (submissionsResult.error) console.error("[Submissions] query error:", submissionsResult.error);
+  }
   const maxScore = Number(assignment.max_score) || 100;
 
   // Attempt numbers per student (1 = first upload).
@@ -161,9 +167,36 @@ export default async function AdminAssignmentPage({
         }
       />
 
-      {submissionsResult.error ? <Alert>{t("loadError")}</Alert> : null}
-      {overviewResult.error ? <Alert>{ta("overviewError")}</Alert> : null}
-      {similarityResult.error ? <Alert>{t("similarityLoadError")}</Alert> : null}
+      {submissionsResult.error ? (
+        <Alert>
+          {t("loadError")}
+          {process.env.NODE_ENV !== "production" && (
+            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+              {submissionsResult.error.message}
+            </pre>
+          )}
+        </Alert>
+      ) : null}
+      {overviewResult.error ? (
+        <Alert>
+          {ta("overviewError")}
+          {process.env.NODE_ENV !== "production" && (
+            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+              {overviewResult.error.message}
+            </pre>
+          )}
+        </Alert>
+      ) : null}
+      {similarityResult.error ? (
+        <Alert>
+          {t("similarityLoadError")}
+          {process.env.NODE_ENV !== "production" && (
+            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+              {similarityResult.error.message}
+            </pre>
+          )}
+        </Alert>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

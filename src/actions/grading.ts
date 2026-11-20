@@ -6,7 +6,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { gradingRequestSchema, idSchema } from "@/lib/validation";
-import { isGradingConfigured } from "@/lib/grading/gemini";
+import { isGradingConfigured } from "@/lib/grading/provider";
 import {
   gradePendingForAssignment,
   gradeSubmissionById,
@@ -14,9 +14,9 @@ import {
 } from "@/lib/grading/service";
 import type { GradeState } from "@/lib/types";
 
-async function isCurrentUserAdmin(): Promise<boolean> {
+async function isCurrentUserStaff(): Promise<boolean> {
   const profile = await getCurrentProfile();
-  return profile?.role === "admin";
+  return profile?.role === "admin" || profile?.role === "teacher";
 }
 
 function failureKey(reason: GradeFailure): string {
@@ -47,7 +47,7 @@ export async function gradeSubmissionAction(
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "admin.review" });
 
-  if (!(await isCurrentUserAdmin())) {
+  if (!(await isCurrentUserStaff())) {
     return { status: "error", error: t("errors.forbidden") };
   }
 
@@ -106,7 +106,7 @@ export async function gradePendingAction(
   const t = await getTranslations({ locale, namespace: "admin.assignment" });
   const tr = await getTranslations({ locale, namespace: "admin.review" });
 
-  if (!(await isCurrentUserAdmin())) {
+  if (!(await isCurrentUserStaff())) {
     return { status: "error", error: t("errors.forbidden") };
   }
 

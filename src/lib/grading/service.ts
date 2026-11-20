@@ -2,7 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SubmissionStatus } from "@/lib/types";
-import { GradingError, gradeCode, gradingConfig, isGradingConfigured } from "./gemini";
+import { GradingError, gradeCode, providerConfig, isGradingConfigured } from "./provider";
 
 export const MAX_GRADING_ATTEMPTS = 3;
 
@@ -266,7 +266,7 @@ export async function gradePendingForAssignment(
 
 /** Used by the admin screens to explain why grading is / is not available. */
 export function gradingStatus(): { configured: boolean; mock: boolean; model: string } {
-  const config = gradingConfig();
+  const config = providerConfig();
   return {
     configured: Boolean(config.apiKey) || config.mock,
     mock: config.mock,
