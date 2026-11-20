@@ -24,6 +24,8 @@ type AttendanceRow = {
   status: "present" | "absent" | "late";
 };
 
+type QueryResult<T> = { data: T[] | null; error: { message: string } | null };
+
 export default async function AdminAttendancePage({
   params,
   searchParams,
@@ -42,7 +44,7 @@ export default async function AdminAttendancePage({
   const { session: sessionIdParam } = await searchParams;
 
   const supabase = await createClient();
-  const [sessionsResult, studentsResult, attendanceResult] = await Promise.all([
+  const [sessionsResult, studentsResult] = await Promise.all([
     supabase
       .from("sessions")
       .select("id, title, session_date")
@@ -56,18 +58,27 @@ export default async function AdminAttendancePage({
       .order("full_name", { ascending: true })
       .limit(500)
       .returns<StudentRow[]>(),
-    supabase
+  ]);
+
+  // Only query attendance if a session is selected
+  let attendanceResult: QueryResult<AttendanceRow> = { data: null, error: null };
+  if (sessionIdParam) {
+    attendanceResult = await supabase
       .from("attendance")
       .select("student_id, status")
-      .eq("session_id", sessionIdParam ?? "")
-      .returns<AttendanceRow[]>(),
-  ]);
+      .eq("session_id", sessionIdParam)
+      .returns<AttendanceRow[]>();
+  }
 
   const sessions = sessionsResult.data ?? [];
   const allStudents = studentsResult.data ?? [];
   const attendance = attendanceResult.data ?? [];
 
-  const selectedSession = sessions.find((s) => s.id === sessionIdParam) ?? sessions[0] ?? null;
+  // Default to first session if none selected
+  const selectedSession = sessionIdParam
+    ? sessions.find((s) => s.id === sessionIdParam) ?? null
+    : sessions[0] ?? null;
+
   const statusByStudent = new Map(attendance.map((row) => [row.student_id, row.status]));
 
   const presentStudents = allStudents
@@ -84,13 +95,29 @@ export default async function AdminAttendancePage({
 
   const markedStudents = [...presentStudents, ...lateStudents, ...absentStudents];
 
+  // Log real errors in development for debugging
+  if (process.env.NODE_ENV !== "production") {
+    if (sessionsResult.error) console.error("[AdminAttendance] sessions query error:", sessionsResult.error);
+    if (studentsResult.error) console.error("[AdminAttendance] students query error:", studentsResult.error);
+    if (sessionIdParam && attendanceResult.error) console.error("[AdminAttendance] attendance query error:", attendanceResult.error);
+  }
+
+  // Pass actual error messages to client in development
+  const errorMessages: string[] = [];
+  if (sessionsResult.error) errorMessages.push(sessionsResult.error.message);
+  if (studentsResult.error) errorMessages.push(studentsResult.error.message);
+  if (sessionIdParam && attendanceResult.error) errorMessages.push(attendanceResult.error.message);
+
+  const hasError = errorMessages.length > 0;
+
   return (
     <AdminAttendanceClient
       locale={locale}
       sessions={sessions}
       markedStudents={markedStudents}
       selectedSession={selectedSession}
-      hasError={Boolean(sessionsResult.error || studentsResult.error || attendanceResult.error)}
+      hasError={hasError}
+      errorMessage={process.env.NODE_ENV !== "production" ? errorMessages.join("; ") : undefined}
     />
   );
 }

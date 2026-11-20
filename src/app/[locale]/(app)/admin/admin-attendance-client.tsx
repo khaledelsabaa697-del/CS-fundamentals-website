@@ -50,12 +50,14 @@ export function AdminAttendanceClient({
   markedStudents,
   selectedSession,
   hasError,
+  errorMessage,
 }: {
   locale: string;
   sessions: SessionRow[];
   markedStudents: MarkedStudent[];
   selectedSession: SessionRow | null;
   hasError: boolean;
+  errorMessage?: string;
 }) {
   const t = useTranslations("admin.attendance");
   const ts = useTranslations("attendanceStatus");
@@ -84,7 +86,14 @@ export function AdminAttendanceClient({
         }
       />
 
-      {hasError ? <Alert>{t("loadError")}</Alert> : null}
+      {hasError ? (
+        <Alert>
+          {t("loadError")}
+          {errorMessage && process.env.NODE_ENV !== "production" && (
+            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">{errorMessage}</pre>
+          )}
+        </Alert>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[28rem_1fr]">
         <Card>

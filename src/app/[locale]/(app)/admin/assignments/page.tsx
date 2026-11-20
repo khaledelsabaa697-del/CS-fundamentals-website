@@ -57,12 +57,32 @@ export default async function AdminAssignmentsPage({
   const assignments = assignmentsResult.data ?? [];
   const now = Date.now();
 
+  // Log real errors in development
+  if (process.env.NODE_ENV !== "production") {
+    if (assignmentsResult.error) console.error("[AdminAssignments] assignments query error:", assignmentsResult.error);
+    if (overviewResult.error) console.error("[AdminAssignments] overview RPC error:", overviewResult.error);
+  }
+
+  // Collect error messages for dev display
+  const errorMessages: string[] = [];
+  if (assignmentsResult.error) errorMessages.push(assignmentsResult.error.message);
+  if (overviewResult.error) errorMessages.push(overviewResult.error.message);
+  const hasError = errorMessages.length > 0;
+
   return (
     <div className="space-y-6">
       <PageHeader title={t("title")} description={t("subtitle")} />
 
-      {assignmentsResult.error ? <Alert>{t("loadError")}</Alert> : null}
-      {overviewResult.error ? <Alert>{t("overviewError")}</Alert> : null}
+      {hasError ? (
+        <Alert>
+          {assignmentsResult.error ? t("loadError") : t("overviewError")}
+          {process.env.NODE_ENV !== "production" && errorMessages.length > 0 && (
+            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+              {errorMessages.join("; ")}
+            </pre>
+          )}
+        </Alert>
+      ) : null}
 
       <AssignmentForm locale={locale} mode="create" />
 
