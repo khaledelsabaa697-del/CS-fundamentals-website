@@ -9,7 +9,7 @@ import {
   StatCard,
   buttonSecondary,
 } from "@/components/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { cn, formatDate, formatNumber, initials } from "@/lib/utils";
@@ -34,7 +34,7 @@ export default async function AdminAnalyticsPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireAdmin(locale);
+  await requireStaff(locale);
   const t = await getTranslations("admin.analytics");
 
   const supabase = await createClient();

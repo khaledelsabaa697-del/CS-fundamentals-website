@@ -15,7 +15,7 @@ import {
   StatCard,
   buttonSecondary,
 } from "@/components/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { gradingStatus } from "@/lib/grading/service";
@@ -62,7 +62,7 @@ export default async function AdminAssignmentPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireAdmin(locale);
+  await requireStaff(locale);
 
   const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) notFound();

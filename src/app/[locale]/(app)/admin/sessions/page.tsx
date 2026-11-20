@@ -9,7 +9,7 @@ import {
   PageHeader,
   buttonSecondary,
 } from "@/components/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
@@ -29,7 +29,7 @@ export default async function AdminSessionsPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireAdmin(locale);
+  await requireStaff(locale);
   const t = await getTranslations("admin.sessions");
   const tn = await getTranslations("nav");
 

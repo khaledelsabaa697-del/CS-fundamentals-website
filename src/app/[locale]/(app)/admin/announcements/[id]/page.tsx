@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { AnnouncementForm } from "@/components/admin/announcement-form";
 import { DeleteAnnouncementForm } from "@/components/admin/delete-announcement-form";
 import { Card, CardHeader, PageHeader } from "@/components/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
@@ -19,7 +19,7 @@ export default async function EditAnnouncementPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireAdmin(locale);
+  await requireStaff(locale);
   const t = await getTranslations("admin.announcements");
 
   const parsedId = idSchema.safeParse(id);

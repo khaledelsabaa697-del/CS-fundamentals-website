@@ -10,7 +10,7 @@ import {
   PageHeader,
   badgeClass,
 } from "@/components/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { gradingStatus } from "@/lib/grading/service";
@@ -53,7 +53,7 @@ export default async function SubmissionReviewPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireAdmin(locale);
+  await requireStaff(locale);
 
   const assignmentId = idSchema.safeParse(id);
   const parsedSubmissionId = idSchema.safeParse(submissionId);

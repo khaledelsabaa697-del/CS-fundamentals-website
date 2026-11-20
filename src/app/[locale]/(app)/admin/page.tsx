@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Alert, Card, CardHeader, EmptyState, PageHeader, StatCard, buttonPrimary } from "@/components/ui";
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, initials } from "@/lib/utils";
@@ -23,7 +23,7 @@ export default async function AdminOverviewPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireAdmin(locale);
+  await requireStaff(locale);
   const t = await getTranslations("admin.overview");
 
   const supabase = await createClient();

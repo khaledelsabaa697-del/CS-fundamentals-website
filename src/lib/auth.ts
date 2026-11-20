@@ -49,6 +49,12 @@ export async function requireTeacher(locale: AppLocale): Promise<Profile> {
   return profile;
 }
 
+/**
+ * Alias for requireTeacher - allows both admin and teacher (staff roles).
+ * Use for panel pages that both roles should access.
+ */
+export const requireStaff = requireTeacher;
+
 export function homePath(locale: AppLocale, role: UserRole): string {
   if (role === "admin") return `/${locale}/admin`;
   if (role === "teacher") return `/${locale}/admin`;
