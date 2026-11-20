@@ -1,8 +1,10 @@
 -- Fix: Allow teachers to use remaining admin RPC functions
 -- These functions currently check is_admin() but should allow teachers too.
+-- Must drop first because return types may have changed.
 
 -- 1. Update admin_session_overview() to allow teachers
-create or replace function public.admin_session_overview()
+drop function if exists public.admin_session_overview();
+create function public.admin_session_overview()
 returns table (
   id uuid,
   title text,
@@ -45,7 +47,8 @@ end;
 $$;
 
 -- 2. Update admin_student_metrics() to allow teachers
-create or replace function public.admin_student_metrics()
+drop function if exists public.admin_student_metrics();
+create function public.admin_student_metrics()
 returns table (
   student_id uuid,
   attended bigint,
@@ -111,7 +114,8 @@ end;
 $$;
 
 -- 3. Update admin_analytics() to allow teachers
-create or replace function public.admin_analytics()
+drop function if exists public.admin_analytics();
+create function public.admin_analytics()
 returns jsonb
 language plpgsql
 stable
@@ -218,7 +222,8 @@ end;
 $$;
 
 -- 4. Update admin_points_overview() to allow teachers
-create or replace function public.admin_points_overview()
+drop function if exists public.admin_points_overview();
+create function public.admin_points_overview()
 returns table (
   student_id         uuid,
   username           text,
