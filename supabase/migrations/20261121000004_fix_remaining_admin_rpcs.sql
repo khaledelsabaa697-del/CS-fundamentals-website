@@ -1,6 +1,7 @@
 -- Fix: Allow teachers to use remaining admin RPC functions
 -- These functions currently check is_admin() but should allow teachers too.
 -- Must drop first because return types may have changed.
+-- Using unique dollar-quote delimiters for each function to avoid nesting issues.
 
 -- 1. Update admin_session_overview() to allow teachers
 drop function if exists public.admin_session_overview();
@@ -21,7 +22,7 @@ language plpgsql
 stable
 security definer
 set search_path = ''
-as $$
+as $session_overview$
 begin
   if not public.is_teacher_or_admin() then
     raise exception 'forbidden' using errcode = '42501';
@@ -61,7 +62,7 @@ language plpgsql
 stable
 security definer
 set search_path = ''
-as $$
+as $student_metrics$
 begin
   if not public.is_teacher_or_admin() then
     raise exception 'forbidden' using errcode = '42501';
@@ -121,7 +122,7 @@ language plpgsql
 stable
 security definer
 set search_path = ''
-as $$
+as $analytics$
 declare
   v_totals  jsonb;
   v_weeks   jsonb;
@@ -245,7 +246,7 @@ language plpgsql
 stable
 security definer
 set search_path = ''
-as $$
+as $points_overview$
 #variable_conflict use_column
 declare
   v_week_start timestamptz;
