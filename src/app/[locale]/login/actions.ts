@@ -36,8 +36,10 @@ export async function loginAction(
 
   // Verify Turnstile token if configured
   const turnstileToken = formData.get("turnstile_token") as string | null;
+  console.log("[Login] Turnstile token received:", turnstileToken ? `${turnstileToken.substring(0, 20)}...` : "empty");
   const turnstileResult = await verifyTurnstile(turnstileToken);
   if (!turnstileResult.ok) {
+    console.warn("[Login] Turnstile verification failed:", turnstileResult);
     return {
       error:
         turnstileResult.code === "not_configured"

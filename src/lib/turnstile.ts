@@ -38,6 +38,7 @@ export async function verifyTurnstile(token: string | null): Promise<TurnstileRe
   }
 
   if (!token) {
+    console.warn("[Turnstile] No token provided");
     return { ok: false, code: "missing_token" };
   }
 
@@ -52,6 +53,8 @@ export async function verifyTurnstile(token: string | null): Promise<TurnstileRe
     });
 
     const data: { success?: boolean; "error-codes"?: string[] } = await response.json();
+
+    console.log("[Turnstile] Verification response:", { success: data.success, errorCodes: data["error-codes"] });
 
     if (data.success) {
       return { ok: true };
