@@ -222,14 +222,17 @@ export async function gradeCode(
       }
 
       const status = response.status;
-      console.error(`AI grading failed with status ${status} (attempt ${attempt}).`);
+      const responseBody = await response.text().catch(() => "");
+      console.error(`AI grading failed with status ${status} (attempt ${attempt}). URL: ${url}, Model: ${config.model}, Response: ${responseBody.slice(0, 500)}`);
 
       if (status === 429) {
         lastFailure = new GradingError("rateLimited", "AI provider rate limit reached.");
       } else if (status === 401 || status === 403) {
         throw new GradingError("config", "AI provider rejected the API key.");
       } else if (status === 400) {
-        throw new GradingError("api", "AI provider rejected the request.");
+        throw new GradingError("api", `AI provider rejected the request: ${responseBody.slice(0, 200)}`);
+      } else if (status === 404) {
+        throw new GradingError("api", `AI provider endpoint not found (404). Check AI_BASE_URL (${config.baseUrl}) and model (${config.model}). Response: ${responseBody.slice(0, 200)}`);
       } else {
         lastFailure = new GradingError("api", `AI provider returned ${status}.`);
       }

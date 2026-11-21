@@ -19,14 +19,14 @@ export type TurnstileResult =
  * check is skipped (with a warning); in production a missing key fails closed.
  */
 export async function verifyTurnstile(token: string | null): Promise<TurnstileResult> {
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
+  const secretKey = process.env.TURNSTILE_SECRET_KEY?.trim();
   const isProduction = process.env.NODE_ENV === "production";
 
   if (!siteKey || !secretKey) {
     if (isProduction) {
       console.error(
-        "[Turnstile] CAPTCHA is not fully configured in production; rejecting the request.",
+        "[Turnstile] CAPTCHA is not fully configured in production; rejecting the request. Site key present:", Boolean(siteKey), "Secret key present:", Boolean(secretKey),
       );
       return { ok: false, code: "not_configured" };
     }

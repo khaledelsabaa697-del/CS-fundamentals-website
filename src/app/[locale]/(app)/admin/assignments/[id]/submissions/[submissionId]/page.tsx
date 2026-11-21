@@ -83,10 +83,11 @@ export default async function SubmissionReviewPage({
   const issues = stringList(data.ai_issues);
   const grading = gradingStatus();
 
-  const { data: signed } = await supabase.storage
-    .from("submissions")
-    .createSignedUrl(data.file_path, 600);
-  const signedUrl = signed?.signedUrl ?? null;
+  const isFileSubmission = data.submission_type === "file" && data.file_path;
+  const signedResult = isFileSubmission
+    ? await supabase.storage.from("submissions").createSignedUrl(data.file_path!, 600)
+    : { data: { signedUrl: null } as any, error: null };
+  const signedUrl = signedResult.data?.signedUrl ?? null;
 
   return (
     <div className="space-y-6">
