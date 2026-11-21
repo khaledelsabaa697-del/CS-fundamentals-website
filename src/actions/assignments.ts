@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   assignmentSchema,
   idSchema,
@@ -20,6 +21,11 @@ import type {
 async function isCurrentUserAdmin(): Promise<boolean> {
   const profile = await getCurrentProfile();
   return profile?.role === "admin";
+}
+
+async function isCurrentUserStaff(): Promise<boolean> {
+  const profile = await getCurrentProfile();
+  return profile?.role === "admin" || profile?.role === "teacher";
 }
 
 function parseAssignmentForm(formData: FormData) {
@@ -198,7 +204,7 @@ export async function reviewSubmissionAction(
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "admin.review" });
 
-  if (!(await isCurrentUserAdmin())) {
+  if (!(await isCurrentUserStaff())) {
     return { status: "error", error: t("errors.forbidden") };
   }
 
@@ -212,7 +218,7 @@ export async function reviewSubmissionAction(
     return { status: "error", error: t("errors.invalid") };
   }
 
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   const { data: submission, error: lookupError } = await supabase
     .from("submissions")
